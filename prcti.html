@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Grooming Shed - Dog Grooming in Lucknow, Uttar Pradesh</title>
+    <link rel="stylesheet" href="pract.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Loader with Animated Dog -->
+    <div class="loader" aria-hidden="true">
+        <div class="dog">
+            <div class="heart heart--1"></div>
+            <div class="heart heart--2"></div>
+            <div class="heart heart--3"></div>
+            <div class="heart heart--4"></div>
+            <div class="head">
+                <div class="ear ear--left"></div>
+                <div class="ear ear--right"></div>
+                <div class="nose"></div>    
+                <div class="face">
+                    <div class="eye eye--left"></div>
+                    <div class="eye eye--right"></div>
+                    <div class="mouth"></div>
+                </div>
+            </div>
+            <div class="body">
+                <div class="chest"></div> <!-- Changed from "cheast" to "chest" -->
+                <div class="legs">
+                    <div class="legs__front legs__front--left"></div>
+                    <div class="legs__front legs__front--right"></div>
+                    <div class="legs__back legs__back--left"></div>
+                    <div class="legs__back legs__back--right"></div>
+                </div>
+                <div class="tail"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="container" hidden>
+        <header class="header" id="home">
+            <nav class="nav-links">
+                <a href="#home">Home</a> | <a href="#about">About</a> | <a href="#services">Services & Prices</a> | 
+                <a href="#reviews">Reviews</a> | <a href="#gallery">Gallery</a> | <a href="#contact">Contact</a>
+            </nav>
+            <img src="C:\Users\Admin\Downloads\grooming-dog2.jpg" alt="Cute dog being groomed" class="header-img">
+            <h1>The Grooming Shed</h1>
+            <p class="tagline">"Pampered Pets Are Happy Pets"</p>
+        </header>
+
+        <section class="intro">
+            <p>The Grooming Shed offers a relaxed atmosphere and caters to all your dog's needs. Your pet will be treated as one of our own and receive the care and attention your pet deserves.</p>
+            <p>While your pet is at The Grooming Shed, they will have time to rest, stretch their legs in the garden, and have a drink of water, so their experience with us is enjoyable.</p>
+            <button class="btn btn-primary" data-modal-open="booking">Book An Appointment</button>
+        </section>
+
+        <section class="services" id="services">
+            <h2>Dog Grooming Services in Lucknow, Uttar Pradesh</h2>
+            <p>Appointments Monday to Saturday with flexible times available.</p>
+        </section>
+
+        <section class="testimonials" id="reviews">
+            <h2>Client Testimonials</h2>
+            <p>"I cannot recommend Gemma highly enough. Our dog has been to other groomers, but no one has given Eric a better cut. Gemma is friendly and always tries to accommodate appointment times to suit the customer. Wouldn't go anywhere else now!"</p>
+            <p>"Found The Grooming Shed by luck, looked at the testimonials, and took a chance. Really pleased we did—our little old bones came home smelling wonderful, soft, and fluffy with her nails clipped. Will definitely be going back!"</p>
+        </section>
+
+        <section class="gallery" id="gallery">
+            <h2>Gallery</h2>
+            <div class="gallery-container">
+                <img src="gallery1.jpg" alt="Dog being groomed" class="gallery-img">
+                <img src="gallery2.jpg" alt="Happy dog after grooming" class="gallery-img">
+                <img src="gallery3.jpg" alt="Dog in garden" class="gallery-img">
+                <img src="gallery4.jpg" alt="Grooming tools" class="gallery-img">
+                <img src="gallery5.jpg" alt="Dog with new haircut" class="gallery-img">
+                <!-- Duplicate images for seamless looping -->
+                <img src="gallery1.jpg" alt="Dog being groomed" class="gallery-img">
+                <img src="gallery2.jpg" alt="Happy dog after grooming" class="gallery-img">
+                <img src="gallery3.jpg" alt="Dog in garden" class="gallery-img">
+                <img src="gallery4.jpg" alt="Grooming tools" class="gallery-img">
+                <img src="gallery5.jpg" alt="Dog with new haircut" class="gallery-img">
+            </div>
+        </section>
+
+        <section class="blog" id="about">
+            <h2>The Dog Blog!</h2>
+            <article>
+                <h3>Lead VS Harness</h3>
+                <p>As a dog owner, I have purchased many leads and harnesses over the years for my pooches. I think it’s important to find a lead or harness that suits both your dog and you...</p>
+                <a href="#">100 Read more</a>
+            </article>
+            <article>
+                <h3>Dog Friendly Parks in Lucknow</h3>
+                <p>On my routine morning walk at Cedars Park, I was thinking about how many great parks there are in Lucknow which you can take your pooch to...</p>
+                <a href="#">104 Read more</a>
+            </article>
+            <article>
+                <h3>Partners In Crime</h3>
+                <p>I have recently welcomed my gorgeous new cockapoo puppy Kipper into my life. He is 4 months old now and has such character...</p>
+                <a href="#">103 Read more</a>
+            </article>
+            <article>
+                <h3>Dog Grooming Maintenance</h3>
+                <p>It is every groomer’s dream to have the perfect dog come in for their groom; a dog that leaps in the gate so excitedly...</p>
+                <a href="#">38 Read more</a>
+            </article>
+            <article>
+                <h3>Fleas and Ticks</h3>
+                <p>It is vital to keep up to date with flea, tick, and worming treatment all year round, even in the winter months...</p>
+                <a href="#">81 Read more</a>
+            </article>
+        </section>
+
+        <footer class="footer" id="contact">
+            <div class="footer-right">
+                <h3>The Grooming Shed</h3>
+                <p>Dog Grooming Services in Lucknow</p>
+                <p>Address: 28 Girton Court, Lucknow, Herts, EN8 8UE</p>
+                <p>Tel: 07845 984 597</p>
+                <p>Email: <a href="mailto:gemma.casey92@gmail.com">gemma.casey92@gmail.com</a></p>
+                <p>Additional Email: <a href="mailto:info@thegroomingshed.co.uk">info@thegroomingshed.co.uk</a></p>
+            </div>
+            <p class="copyright">Copyright 2017 The Grooming Shed | Site By WWB and ThinkCreativ</p>
+        </footer>
+    </main>
+
+    <!-- Modal -->
+    <dialog class="modal" id="booking-modal">
+        <div class="modal-content">
+            <h2>Book An Appointment</h2>
+            <button class="modal-close" aria-label="Close booking form">×</button>
+            <form class="booking-form" method="POST">
+                <div class="form-group">
+                    <label for="name">Your Name</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="phone">Phone Number</label>
+                    <input type="tel" id="phone" name="phone" required>
+                </div>
+                <div class="form-group">
+                    <label for="date">Preferred Date</label>
+                    <input type="date" id="date" name="date" required>
+                </div>
+                <div class="form-group">
+                    <label for="service">Service</label>
+                    <select id="service" name="service" required>
+                        <option value="" disabled selected>Select a service</option>
+                        <option value="Bath & Brush">Bath & Brush</option>
+                        <option value="Nail Trimming">Nail Trimming</option>
+                        <option value="Hair Styling">Hair Styling</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Book Appointment</button>
+            </form>
+        </div>
+    </dialog>
+
+    <script src="practjava.js"></script>
+</body>
+</html>

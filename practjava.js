@@ -1,229 +1,287 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Selectors with null checks
-    const loader = document.querySelector('.loader');
-    const main = document.querySelector('main');
-    const modal = document.getElementById('booking-modal');
-    const openButtons = document.querySelectorAll('[data-modal-open]');
-    const closeButton = modal?.querySelector('.modal-close');
-    const form = modal?.querySelector('.booking-form');
-    const navLinks = document.querySelectorAll('.nav-links a');
-    const settingsLink = document.getElementById('settingsLink');
-    const settingsCard = document.getElementById('settingsCard');
-    const closeSettingsBtn = document.getElementById('closeSettingsBtn');
-    const changeSheetBtn = document.getElementById('changeSheetBtn');
-    const changePasswordBtn = document.getElementById('changePasswordBtn');
-    const sheetLinkDiv = document.getElementById('sheetLink');
-    const adminStatus = document.getElementById('adminStatus');
-  
-    // Exit early if critical elements are missing
-    if (!loader || !main || !modal || !form || !closeButton) {
-      console.error('Critical DOM elements missing:', { loader, main, modal, form, closeButton });
+  console.log('DOM fully loaded, starting script execution...');
+
+  // Selectors with null checks
+  const loader = document.querySelector('.loader');
+  const main = document.querySelector('main');
+  const modal = document.getElementById('booking-modal');
+  const openButtons = document.querySelectorAll('[data-modal-open]');
+  const closeButton = modal?.querySelector('.modal-close');
+  const form = modal?.querySelector('.booking-form');
+  const navLinks = document.querySelectorAll('.nav-links a');
+  const settingsLink = document.getElementById('settingsLink');
+  const settingsCard = document.getElementById('settingsCard');
+  const closeSettingsBtn = document.getElementById('closeSettingsBtn');
+  const changeSheetBtn = document.getElementById('changeSheetBtn');
+  const changePasswordBtn = document.getElementById('changePasswordBtn');
+  const sheetLinkDiv = document.getElementById('sheetLink');
+  const adminStatus = document.getElementById('adminStatus');
+
+  // Exit early if critical elements are missing
+  if (!loader || !main || !modal || !form || !closeButton) {
+      console.error('Critical DOM elements missing, exiting early:', { loader, main, modal, form, closeButton });
       return;
-    }
-  
-    // Initial setup: default password and phone number
-    let businessPassword = localStorage.getItem('businessPassword') || 'grooming123';
-    let businessPhone = localStorage.getItem('businessPhone') || '07845984597';
-  
-    // Loader
-    setTimeout(() => {
+  }
+
+  // Initial setup: default password, phone, and sheet ID
+  let businessPassword = localStorage.getItem('businessPassword') || 'grooming123';
+  let businessPhone = localStorage.getItem('businessPhone') || '07845984597';
+  const defaultSheetId = '1cqV3_MO1SFx4mqr2cnZJa59GS4OU37dmUih_Qfgh0dQ';
+  const sheetId = localStorage.getItem('sheetId') || defaultSheetId;
+  localStorage.setItem('sheetId', sheetId);
+  localStorage.setItem('sheetUrl', localStorage.getItem('sheetUrl') || `https://docs.google.com/spreadsheets/d/${sheetId}/edit?gid=0#gid=0`);
+
+  // Loader
+  setTimeout(() => {
+      console.log('Hiding loader');
       loader.classList.add('hidden');
       setTimeout(() => {
-        loader.style.display = 'none';
-        main.removeAttribute('hidden');
-      }, 500);
-    }, 1500);
-  
-    // Modal Open
-    openButtons.forEach((button) => {
-      button.addEventListener('click', () => modal.showModal());
-    });
-  
-    // Modal Close
-    closeButton.addEventListener('click', () => modal.close());
-    modal.addEventListener('click', (e) => {
+          loader.style.display = 'none';
+          main.removeAttribute('hidden');
+      }, 500); // Match CSS transition duration
+  }, 1500);
+
+  // Modal Open
+  openButtons.forEach(button => {
+      button.addEventListener('click', () => {
+          console.log('Opening modal');
+          modal.showModal();
+      });
+  });
+
+  // Modal Close handlers
+  closeButton.addEventListener('click', () => modal.close());
+  modal.addEventListener('click', e => {
       if (e.target === modal) modal.close();
-    });
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && modal.hasAttribute('open')) modal.close();
-    });
-  
-    // Navigation Scroll
-    navLinks.forEach((link) => {
-      link.addEventListener('click', (e) => {
-        e.preventDefault();
-        const targetId = link.getAttribute('href')?.substring(1);
-        const targetSection = targetId ? document.getElementById(targetId) : null;
-        targetSection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+  document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && modal.open) modal.close();
+  });
+
+  // Navigation Scroll
+  navLinks.forEach(link => {
+      link.addEventListener('click', e => {
+          e.preventDefault();
+          const targetId = link.getAttribute('href')?.slice(1);
+          const targetSection = targetId ? document.getElementById(targetId) : null;
+          targetSection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       });
-    });
-  
-    // Settings Card Toggle
-    if (settingsLink && settingsCard && closeSettingsBtn) {
-      settingsLink.addEventListener('click', (e) => {
-        e.preventDefault();
-        settingsCard.classList.add('active');
-        document.body.classList.add('settings-open');
+  });
+
+  // Settings Card Toggle
+  if (settingsLink && settingsCard && closeSettingsBtn) {
+      settingsLink.addEventListener('click', e => {
+          e.preventDefault();
+          settingsCard.classList.add('active');
+          document.body.classList.add('settings-open');
       });
-  
       closeSettingsBtn.addEventListener('click', () => {
-        settingsCard.classList.remove('active');
-        document.body.classList.remove('settings-open');
+          settingsCard.classList.remove('active');
+          document.body.classList.remove('settings-open');
       });
-    }
-  
-    // Load saved sheet URL if it exists
-    if (sheetLinkDiv && localStorage.getItem('sheetUrl')) {
+  }
+
+  // Load saved sheet URL if it exists
+  if (sheetLinkDiv && localStorage.getItem('sheetUrl')) {
       sheetLinkDiv.innerHTML = `Your booking sheet: <a href="${localStorage.getItem('sheetUrl')}" target="_blank">View Sheet</a>`;
-    }
-  
-    // Change Sheet Logic
-    if (changeSheetBtn && sheetLinkDiv && adminStatus) {
+  }
+
+  // Change Sheet Logic
+  if (changeSheetBtn && sheetLinkDiv && adminStatus) {
       changeSheetBtn.addEventListener('click', () => {
-        const enteredPassword = prompt('Enter the business owner password:');
-        if (enteredPassword === businessPassword) {
-          const choice = prompt('Type "new" to create a new sheet or enter an existing Sheet ID:');
-          if (choice?.toLowerCase() === 'new') {
-            const iframe = document.createElement('iframe');
-            iframe.src = 'https://script.google.com/macros/s/AKfycbxnfJGEm0rXw7vnemZMwx9_cb-SlqExsyqRY21GUeWoNaKXDXTruWhWWM5n91gWgTjM-Q/exec';
-            iframe.style.cssText = 'width: 100%; height: 300px; border: none; margin-top: 1rem;';
-            sheetLinkDiv.innerHTML = '';
-            sheetLinkDiv.appendChild(iframe);
-            adminStatus.textContent = 'Access granted. Set up your new sheet above.';
-          } else if (choice?.trim()) {
-            const newSheetId = choice.trim();
-            const newSheetUrl = `https://docs.google.com/spreadsheets/d/${newSheetId}/edit`;
-            localStorage.setItem('sheetId', newSheetId);
-            localStorage.setItem('sheetUrl', newSheetUrl);
-            sheetLinkDiv.innerHTML = `Your booking sheet: <a href="${newSheetUrl}" target="_blank">View Sheet</a>`;
-            adminStatus.textContent = 'Sheet changed successfully!';
+          const enteredPassword = prompt('Enter the business owner password:')?.trim();
+          if (enteredPassword === null) return; // User canceled prompt
+          if (enteredPassword === businessPassword) {
+              const newSheetId = prompt('Enter the new Sheet ID:')?.trim();
+              if (newSheetId === null) return; // User canceled prompt
+              if (newSheetId) {
+                  const newSheetUrl = `https://docs.google.com/spreadsheets/d/${newSheetId}/edit`;
+                  localStorage.setItem('sheetId', newSheetId);
+                  localStorage.setItem('sheetUrl', newSheetUrl);
+                  sheetLinkDiv.innerHTML = `Your booking sheet: <a href="${newSheetUrl}" target="_blank">View Sheet</a>`;
+                  adminStatus.textContent = 'Sheet changed successfully!';
+                  setTimeout(() => adminStatus.textContent = '', 3000); // Clear message after 3s
+              } else {
+                  adminStatus.textContent = 'Sheet ID cannot be empty.';
+              }
           } else {
-            adminStatus.textContent = 'Invalid input. Please enter "new" or a valid Sheet ID.';
+              adminStatus.textContent = 'Incorrect password.';
           }
-        } else {
-          adminStatus.textContent = 'Incorrect password. Only the business owner can change the sheet.';
-        }
       });
-    }
-  
-    // Change Password Logic
-    if (changePasswordBtn && adminStatus) {
+  }
+
+  // Change Password Logic
+  if (changePasswordBtn && adminStatus) {
       changePasswordBtn.addEventListener('click', () => {
-        const enteredPhone = prompt('Enter your phone number to verify (e.g., 07845984597):');
-        if (enteredPhone === businessPhone) {
-          const newPassword = prompt('Enter your new password:');
-          if (newPassword?.trim()) {
-            businessPassword = newPassword;
-            localStorage.setItem('businessPassword', businessPassword);
-            adminStatus.textContent = 'Password updated successfully!';
+          const enteredPhone = prompt('Enter your phone number to verify:')?.trim();
+          if (enteredPhone === null) return; // User canceled prompt
+          if (enteredPhone === businessPhone) {
+              const newPassword = prompt('Enter your new password:')?.trim();
+              if (newPassword === null) return; // User canceled prompt
+              if (newPassword) {
+                  businessPassword = newPassword;
+                  localStorage.setItem('businessPassword', newPassword);
+                  adminStatus.textContent = 'Password updated successfully!';
+                  setTimeout(() => adminStatus.textContent = '', 3000); // Clear message after 3s
+              } else {
+                  adminStatus.textContent = 'Password cannot be empty.';
+              }
           } else {
-            adminStatus.textContent = 'Password cannot be empty.';
+              adminStatus.textContent = 'Incorrect phone number.';
           }
-        } else {
-          adminStatus.textContent = 'Incorrect phone number. Only the business owner can change the password.';
-        }
       });
-    }
-  
-    // Listen for Sheet ID and URL from iframe
-    window.addEventListener('message', (event) => {
-      if (event.data?.sheetId && event.data?.sheetUrl && sheetLinkDiv && adminStatus) {
-        localStorage.setItem('sheetId', event.data.sheetId);
-        localStorage.setItem('sheetUrl', event.data.sheetUrl);
-        sheetLinkDiv.innerHTML = `Your booking sheet: <a href="${event.data.sheetUrl}" target="_blank">View Sheet</a>`;
-        adminStatus.textContent = 'Sheet setup complete!';
-      } else {
-        console.warn('Invalid message from iframe:', event.data);
-      }
-    });
-  
-    // Form Submission to Google Sheets
-    form.addEventListener('submit', async (e) => {
+  }
+
+  // Form Submission to Google Sheets
+  form.addEventListener('submit', async e => {
       e.preventDefault();
-  
+      console.log('Form submitted - Starting submission process');
+
+      const nameInput = document.getElementById('name');
       const phoneInput = document.getElementById('phone');
-      const phoneValue = phoneInput?.value.trim();
       const dateInput = document.getElementById('date');
-      const timeInput = document.getElementById('time');
-  
-      if (!phoneInput || !/^\d{10}$/.test(phoneValue)) {
-        alert('Phone number must be exactly 10 digits.');
-        phoneInput?.focus();
-        return;
+      const serviceInput = document.getElementById('service');
+
+      if (!nameInput || !phoneInput || !dateInput || !serviceInput) {
+          console.error('Form inputs missing:', { nameInput, phoneInput, dateInput, serviceInput });
+          alert('Form is incomplete. Please try again.');
+          return;
       }
-  
-      if (!dateInput?.value) {
-        alert('Please select a date.');
-        dateInput?.focus();
-        return;
+
+      const nameValue = nameInput.value.trim();
+      const phoneValue = phoneInput.value.trim();
+      const dateValue = dateInput.value;
+      const serviceValue = serviceInput.value;
+
+      // Validation
+      if (!nameValue) {
+          console.log('Validation failed: No name');
+          alert('Please enter your name.');
+          nameInput.focus();
+          return;
       }
-  
-      if (timeInput && !timeInput.value) {
-        alert('Please select a time.');
-        timeInput.focus();
-        return;
+      if (!phoneValue || !/^\d{10}$/.test(phoneValue)) {
+          console.log('Validation failed: Invalid phone');
+          alert('Phone number must be exactly 10 digits.');
+          phoneInput.focus();
+          return;
       }
-  
-      const formData = new FormData(form);
-      const sheetId = localStorage.getItem('sheetId');
-      if (!sheetId) {
-        alert('No booking sheet configured. Please contact the administrator.');
-        return;
+      if (!dateValue) {
+          console.log('Validation failed: No date');
+          alert('Please select a date.');
+          dateInput.focus();
+          return;
       }
-      formData.append('sheetId', sheetId);
-      formData.append('timestamp', new Date().toISOString());
-  
-      const scriptURL = 'https://script.google.com/macros/s/AKfycbxnfJGEm0rXw7vnemZMwx9_cb-SlqExsyqRY21GUeWoNaKXDXTruWhWWM5n91gWgTjM-Q/exec';
-  
+      if (!serviceValue) {
+          console.log('Validation failed: No service');
+          alert('Please select a service.');
+          serviceInput.focus();
+          return;
+      }
+
+      // Create and show loading circle above the modal
+      console.log('Creating loading circle');
+      const loadingCircle = document.createElement('div');
+      loadingCircle.classList.add('loading-circle');
+      loadingCircle.style.position = 'fixed';
+      loadingCircle.style.top = '50%';
+      loadingCircle.style.left = '50%';
+      loadingCircle.style.transform = 'translate(-50%, -50%)';
+      loadingCircle.style.width = '50px';
+      loadingCircle.style.height = '50px';
+      loadingCircle.style.border = '5px solid #f47e38';
+      loadingCircle.style.borderTop = '5px solid transparent';
+      loadingCircle.style.borderRadius = '50%';
+      loadingCircle.style.animation = 'spin 1s linear infinite';
+      loadingCircle.style.zIndex = '99999'; // Extremely high z-index to ensure it’s above modal
+      loadingCircle.style.display = 'block';
+      document.body.appendChild(loadingCircle);
+      loadingCircle.offsetHeight; // Force repaint
+      console.log('Loading circle added to DOM:', loadingCircle);
+
+      const data = {
+          sheetId,
+          'Name': nameValue,
+          'Phone No.': phoneValue,
+          'Time': dateValue,
+          'Service': serviceValue
+      };
+
+      console.log('Step 3: Data prepared:', data);
+      const scriptURL = 'https://script.google.com/macros/s/AKfycbxMNrV0TsDKKmH09rjrJwpcO2kzyuGd9d5AIPhHVe1J9yuCJbxPj4oFGEamvwGAf2Cv3Q/exec';
+      console.log('Step 4: Sending to:', scriptURL);
+
       try {
-        const response = await fetch(scriptURL, {
-          method: 'POST',
-          body: formData,
-        });
-  
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error('Fetch failed:', response.status, errorText);
-          throw new Error(`Network error: ${response.status} - ${errorText}`);
-        }
-  
-        // Handle the response based on content type
-        const contentType = response.headers.get('Content-Type') || '';
-        let data;
-  
-        if (contentType.includes('application/json')) {
-          data = await response.json();
-        } else {
-          // Fallback for plain text response (e.g., "Success")
-          const text = await response.text();
-          console.warn('Server returned plain text instead of JSON:', text);
-          data = { status: text.trim().toLowerCase() === 'success' ? 'success' : 'error' };
-        }
-  
-        console.log('Server Response:', data);
-  
-        if (data.status === 'success') {
+          await new Promise(resolve => setTimeout(resolve, 1000)); // Ensure visibility for 1 second
+          const response = await fetch(scriptURL, {
+              method: 'POST',
+              mode: 'no-cors',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(data)
+          });
+
+          console.log('Step 5: Fetch completed (opaque response due to no-cors)');
+          console.log('Step 6: Check the sheet now:', `https://docs.google.com/spreadsheets/d/${sheetId}/edit`);
+
+          console.log('Step 7: Removing loading circle');
+          if (document.body.contains(loadingCircle)) {
+              document.body.removeChild(loadingCircle);
+          } else {
+              console.warn('Loading circle not found in DOM for removal');
+          }
+
+          console.log('Step 8: Creating Done popup');
           const popup = document.createElement('div');
           popup.classList.add('popup');
-          const bookedDateTime = data.bookedDateTime || `${formData.get('date')} ${formData.get('time') || 'N/A'}`;
-          popup.textContent = `Booked for: ${bookedDateTime}`;
+          popup.textContent = 'Done';
+          popup.style.position = 'fixed';
+          popup.style.top = '50%';
+          popup.style.left = '50%';
+          popup.style.transform = 'translate(-50%, -50%)';
+          popup.style.background = '#f47e38';
+          popup.style.color = 'white';
+          popup.style.padding = '1rem 2rem';
+          popup.style.borderRadius = '8px';
+          popup.style.fontSize = '1.5rem';
+          popup.style.fontWeight = '600';
+          popup.style.zIndex = '999999'; // Extremely high z-index to ensure it’s above modal
+          popup.style.opacity = '0';
+          popup.style.transition = 'opacity 0.5s ease';
           document.body.appendChild(popup);
-          setTimeout(() => popup.classList.add('show'), 10);
+          popup.offsetHeight; // Force repaint
+          console.log('Step 9: Popup added to DOM:', popup);
+
           setTimeout(() => {
-            popup.classList.remove('show');
-            setTimeout(() => {
-              document.body.removeChild(popup);
-              modal.close();
-              form.reset();
-              document.getElementById('home')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }, 500);
+              popup.style.opacity = '1';
+              console.log('Step 10: Popup shown');
+          }, 10);
+
+          setTimeout(() => {
+              popup.style.opacity = '0';
+              console.log('Step 11: Popup fading out');
+              setTimeout(() => {
+                  if (document.body.contains(popup)) {
+                      document.body.removeChild(popup);
+                  } else {
+                      console.warn('Popup not found in DOM for removal');
+                  }
+                  modal.close();
+                  form.reset();
+                  const homeSection = document.getElementById('home');
+                  if (homeSection) {
+                      homeSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  } else {
+                      console.warn('Home section not found for scrolling');
+                  }
+                  console.log('Step 12: Form reset and scrolled to home');
+              }, 500); // Match CSS transition duration
           }, 2000);
-        } else {
-          throw new Error(data.message || 'Submission failed');
-        }
       } catch (error) {
-        console.error('Submission Error:', error);
-        alert(`An error occurred: ${error.message}`);
+          console.error('Step 5: Fetch failed:', error.message);
+          if (document.body.contains(loadingCircle)) {
+              document.body.removeChild(loadingCircle);
+          }
+          alert(`Submission failed: ${error.message}. Please try again or contact support.`);
       }
-    });
   });
+});

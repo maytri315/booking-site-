@@ -100,7 +100,7 @@ document.addEventListener('DOMContentLoaded', () => {
           localStorage.setItem('sheetUrl', newSheetUrl);
           sheetLinkDiv.innerHTML = `Your booking sheet: <a href="${newSheetUrl}" target="_blank">View Sheet</a>`;
           adminStatus.textContent = 'Sheet changed successfully!';
-          setTimeout(() => adminStatus.textContent = '', 3000); // Clear message after 3s
+          setTimeout(() => adminStatus.textContent = '', 3000);
         } else {
           adminStatus.textContent = 'Sheet ID cannot be empty.';
         }
@@ -122,7 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
           businessPassword = newPassword;
           localStorage.setItem('businessPassword', newPassword);
           adminStatus.textContent = 'Password updated successfully!';
-          setTimeout(() => adminStatus.textContent = '', 3000); // Clear message after 3s
+          setTimeout(() => adminStatus.textContent = '', 3000);
         } else {
           adminStatus.textContent = 'Password cannot be empty.';
         }
@@ -133,105 +133,118 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Form Submission to Google Sheets
-form.addEventListener('submit', async e => {
-  e.preventDefault();
-  console.log('Form submitted - Starting submission process');
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    console.log('Form submitted - Starting submission process');
 
-  const nameInput = document.getElementById('name');
-  const phoneInput = document.getElementById('phone');
-  const dateInput = document.getElementById('date');
-  const serviceInput = document.getElementById('service');
+    const nameInput = document.getElementById('name');
+    const phoneInput = document.getElementById('phone');
+    const dateInput = document.getElementById('date');
+    const serviceInput = document.getElementById('service');
 
-  if (!nameInput || !phoneInput || !dateInput || !serviceInput) {
-    console.error('Form inputs missing:', { nameInput, phoneInput, dateInput, serviceInput });
-    alert('Form setup is broken. Please contact support.');
-    return;
-  }
-
-  const data = {
-    sheetId: localStorage.getItem('sheetId') || defaultSheetId,
-    'Name': nameInput.value.trim(),
-    'Phone No.': phoneInput.value.trim(),
-    'Time': dateInput.value,
-    'Service': serviceInput.value
-  };
-
-  // Validation
-  if (!data.Name) {
-    alert('Please enter your name.');
-    nameInput.focus();
-    return;
-  }
-  if (!data['Phone No.'] || !/^\d{10}$/.test(data['Phone No.'])) {
-    alert('Please enter a valid 10-digit phone number.');
-    phoneInput.focus();
-    return;
-  }
-  if (!data.Time) {
-    alert('Please select a date.');
-    dateInput.focus();
-    return;
-  }
-  if (!data.Service) {
-    alert('Please select a service.');
-    serviceInput.focus();
-    return;
-  }
-
-  // Show loading circle
-  const loadingCircle = document.createElement('div');
-  loadingCircle.classList.add('loading-circle');
-  document.body.appendChild(loadingCircle);
-
-  const scriptURL = 'https://script.google.com/macros/s/AKfycbxnfJGEm0rXw7vnemZMwx9_cb-SlqExsyqRY21GUeWoNaKXDXTruWhWWM5n91gWgTjM-Q/exec';
-  console.log('Submitting to:', scriptURL, 'with data:', data);
-
-  try {
-    // Ensure loading circle is visible for at least 1 second
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    const response = await fetch(scriptURL, {
-      method: 'POST',
-      mode: 'no-cors', // Required for Google Apps Script from GitHub Pages
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
-    });
-    console.log('Fetch completed (opaque response due to no-cors)');
-
-    // Clean up loading circle
-    if (document.body.contains(loadingCircle)) {
-      document.body.removeChild(loadingCircle);
+    if (!nameInput || !phoneInput || !dateInput || !serviceInput) {
+      console.error('Form inputs missing:', { nameInput, phoneInput, dateInput, serviceInput });
+      alert('Form setup is broken. Please contact support.');
+      return;
     }
 
-    // Show success popup (assuming success since no-cors hides response)
-    const popup = document.createElement('div');
-    popup.classList.add('popup');
-    popup.textContent = 'Done';
-    document.body.appendChild(popup);
-    setTimeout(() => popup.style.opacity = '1', 10);
-    setTimeout(() => {
-      popup.style.opacity = '0';
+    const data = {
+      sheetId: localStorage.getItem('sheetId') || defaultSheetId,
+      'Name': nameInput.value.trim(),
+      'Phone No.': phoneInput.value.trim(),
+      'Time': dateInput.value,
+      'Service': serviceInput.value
+    };
+
+    // Validation
+    if (!data.Name) {
+      alert('Please enter your name.');
+      nameInput.focus();
+      return;
+    }
+    if (!data['Phone No.'] || !/^\d{10}$/.test(data['Phone No.'])) {
+      alert('Please enter a valid 10-digit phone number.');
+      phoneInput.focus();
+      return;
+    }
+    if (!data.Time) {
+      alert('Please select a date.');
+      dateInput.focus();
+      return;
+    }
+    if (!data.Service) {
+      alert('Please select a service.');
+      serviceInput.focus();
+      return;
+    }
+
+    // Show loading circle
+    const loadingCircle = document.createElement('div');
+    loadingCircle.classList.add('loading-circle');
+    loadingCircle.style.cssText = `
+      position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      width: 50px; height: 50px; border: 5px solid #f47e38;
+      border-top: 5px solid transparent; border-radius: 50%;
+      animation: spin 1s linear infinite; z-index: 99999;
+    `;
+    document.body.appendChild(loadingCircle);
+
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbxnfJGEm0rXw7vnemZMwx9_cb-SlqExsyqRY21GUeWoNaKXDXTruWhWWM5n91gWgTjM-Q/exec';
+    console.log('Submitting to:', scriptURL, 'with data:', data);
+
+    try {
+      // Ensure loading circle is visible for at least 1 second
+      const fetchPromise = fetch(scriptURL, {
+        method: 'POST',
+        mode: 'no-cors', // Required for Google Apps Script from static hosting
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+
+      await Promise.all([fetchPromise, new Promise(resolve => setTimeout(resolve, 1000))]);
+      console.log('Fetch completed (opaque response due to no-cors)');
+
+      // Clean up loading circle
+      if (document.body.contains(loadingCircle)) {
+        document.body.removeChild(loadingCircle);
+      }
+
+      // Show success popup (assuming success since no-cors hides response)
+      const popup = document.createElement('div');
+      popup.classList.add('popup');
+      popup.textContent = 'Done';
+      popup.style.cssText = `
+        position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+        background: #f47e38; color: white; padding: 1rem 2rem; border-radius: 8px;
+        font-size: 1.5rem; font-weight: 600; z-index: 999999; opacity: 0;
+        transition: opacity 0.5s ease;
+      `;
+      document.body.appendChild(popup);
+      setTimeout(() => popup.style.opacity = '1', 10);
       setTimeout(() => {
-        if (document.body.contains(popup)) {
-          document.body.removeChild(popup);
-        }
-        modal.close();
-        form.reset();
-        const homeSection = document.getElementById('home');
-        if (homeSection) {
-          homeSection.scrollIntoView({ behavior: 'smooth' });
-        } else {
-          console.warn('Home section not found for scrolling');
-        }
-      }, 500); // Match CSS transition duration
-    }, 2000);
+        popup.style.opacity = '0';
+        setTimeout(() => {
+          if (document.body.contains(popup)) {
+            document.body.removeChild(popup);
+          }
+          modal.close();
+          form.reset();
+          const homeSection = document.getElementById('home');
+          if (homeSection) {
+            homeSection.scrollIntoView({ behavior: 'smooth' });
+          } else {
+            console.warn('Home section not found for scrolling');
+          }
+        }, 500); // Match CSS transition duration
+      }, 2000);
 
-    console.log('Submission sent. Check the sheet for updates:', `https://docs.google.com/spreadsheets/d/${data.sheetId}/edit`);
-  } catch (error) {
-    console.error('Submission failed:', error.message);
-    if (document.body.contains(loadingCircle)) {
-      document.body.removeChild(loadingCircle);
+      console.log('Submission sent. Check the sheet for updates:', `https://docs.google.com/spreadsheets/d/${data.sheetId}/edit`);
+    } catch (error) {
+      console.error('Submission failed:', error.message);
+      if (document.body.contains(loadingCircle)) {
+        document.body.removeChild(loadingCircle);
+      }
+      alert('Failed to book appointment. Please check your connection and try again, or contact support.');
     }
-    alert('Failed to book appointment. Please check your connection and try again, or contact support.');
-  }
+  });
 });

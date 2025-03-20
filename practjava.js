@@ -190,10 +190,9 @@ document.addEventListener('DOMContentLoaded', () => {
     document.body.appendChild(loadingCircle);
 
     const scriptURL = 'https://script.google.com/macros/s/AKfycbxnfJGEm0rXw7vnemZMwx9_cb-SlqExsyqRY21GUeWoNaKXDXTruWhWWM5n91gWgTjM-Q/exec';
-    console.log('Submitting to:', scriptURL, 'with data:', data);
+    console.log('Submitting to:', scriptURL, 'with data:', JSON.stringify(data));
 
     try {
-      // Ensure loading circle is visible for at least 1 second
       const fetchPromise = fetch(scriptURL, {
         method: 'POST',
         mode: 'no-cors', // Required for Google Apps Script from static hosting
@@ -201,6 +200,7 @@ document.addEventListener('DOMContentLoaded', () => {
         body: JSON.stringify(data)
       });
 
+      // Ensure loading circle is visible for at least 1 second
       await Promise.all([fetchPromise, new Promise(resolve => setTimeout(resolve, 1000))]);
       console.log('Fetch completed (opaque response due to no-cors)');
 
@@ -244,7 +244,8 @@ document.addEventListener('DOMContentLoaded', () => {
       if (document.body.contains(loadingCircle)) {
         document.body.removeChild(loadingCircle);
       }
-      alert('Failed to book appointment. Please check your connection and try again, or contact support.');
+      alert('Failed to book appointment. Please check your connection and try again, or contact support if this persists.');
+      console.log('Please verify the Google Apps Script at:', scriptURL, 'and ensure it has access to sheet:', data.sheetId);
     }
   });
 });

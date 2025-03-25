@@ -29,7 +29,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const defaultSheetId = '1cqV3_MO1SFx4mqr2cnZJa59GS4OU37dmUih_Qfgh0dQ';
     const sheetId = localStorage.getItem('sheetId') || defaultSheetId;
     localStorage.setItem('sheetId', sheetId);
-    localStorage.setItem('sheetUrl', localStorage.getItem('sheetUrl') || `https://docs.google.com/spreadsheets/d/${sheetId}/edit?gid=0#gid=0`);
+    const sheetUrl = localStorage.getItem('sheetUrl') || `https://docs.google.com/spreadsheets/d/${sheetId}/edit?gid=0#gid=0`;
+    localStorage.setItem('sheetUrl', sheetUrl);
 
     // Loader
     setTimeout(() => {
@@ -81,9 +82,25 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Load saved sheet URL if it exists
-    if (sheetLinkDiv && localStorage.getItem('sheetUrl')) {
-        sheetLinkDiv.innerHTML = `Your booking sheet: <a href="${localStorage.getItem('sheetUrl')}" target="_blank">View Sheet</a>`;
+    // Load saved sheet URL if it exists and add password protection
+    if (sheetLinkDiv && sheetUrl) {
+        sheetLinkDiv.innerHTML = `Your booking sheet: <a href="${sheetUrl}" target="_blank" id="viewSheetLink">View Sheet</a>`;
+        const viewSheetLink = document.getElementById('viewSheetLink');
+        if (viewSheetLink) {
+            viewSheetLink.addEventListener('click', (e) => {
+                e.preventDefault(); // Prevent immediate navigation
+                const enteredPassword = prompt('Enter the business owner password to view the sheet:')?.trim();
+                if (enteredPassword === null) return; // User canceled
+                if (enteredPassword === businessPassword) {
+                    console.log('Password correct, redirecting to sheet');
+                    window.open(sheetUrl, '_blank'); // Open sheet in new tab
+                } else {
+                    adminStatus.textContent = 'Incorrect password. Access denied.';
+                    console.log('Incorrect password entered');
+                    setTimeout(() => adminStatus.textContent = '', 3000);
+                }
+            });
+        }
     }
 
     // Change Sheet Logic
@@ -98,9 +115,27 @@ document.addEventListener('DOMContentLoaded', () => {
                     const newSheetUrl = `https://docs.google.com/spreadsheets/d/${newSheetId}/edit`;
                     localStorage.setItem('sheetId', newSheetId);
                     localStorage.setItem('sheetUrl', newSheetUrl);
-                    sheetLinkDiv.innerHTML = `Your booking sheet: <a href="${newSheetUrl}" target="_blank">View Sheet</a>`;
+                    sheetLinkDiv.innerHTML = `Your booking sheet: <a href="${newSheetUrl}" target="_blank" id="viewSheetLink">View Sheet</a>`;
                     adminStatus.textContent = 'Sheet changed successfully!';
                     setTimeout(() => adminStatus.textContent = '', 3000);
+
+                    // Re-attach event listener to the new "View Sheet" link
+                    const newViewSheetLink = document.getElementById('viewSheetLink');
+                    if (newViewSheetLink) {
+                        newViewSheetLink.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            const enteredPassword = prompt('Enter the business owner password to view the sheet:')?.trim();
+                            if (enteredPassword === null) return;
+                            if (enteredPassword === businessPassword) {
+                                console.log('Password correct, redirecting to sheet');
+                                window.open(newSheetUrl, '_blank');
+                            } else {
+                                adminStatus.textContent = 'Incorrect password. Access denied.';
+                                console.log('Incorrect password entered');
+                                setTimeout(() => adminStatus.textContent = '', 3000);
+                            }
+                        });
+                    }
                 } else {
                     adminStatus.textContent = 'Sheet ID cannot be empty.';
                 }

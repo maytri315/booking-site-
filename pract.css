@@ -817,10 +817,22 @@ body.settings-open::before {
 }
 
 @media (max-width: 768px) {
-  .popup {
-      font-size: 1.2rem;
-      padding: 0.8rem 1.5rem;
-      max-width: 90%;
-      z-index: 999999;
-  }
+.popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #f47e38;
+    color: white;
+    padding: 1rem 2rem;
+    border-radius: 8px;
+    font-size: 1.5rem;
+    font-weight: 600;
+    z-index: 999999; /* High enough to be above modal */
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+
+.popup.show {
+    opacity: 1;
 }

@@ -27,9 +27,9 @@ document.addEventListener('DOMContentLoaded', () => {
     let businessPassword = localStorage.getItem('businessPassword') || 'grooming123';
     let businessPhone = localStorage.getItem('businessPhone') || '07845984597';
     const defaultSheetId = '1cqV3_MO1SFx4mqr2cnZJa59GS4OU37dmUih_Qfgh0dQ';
-    const sheetId = localStorage.getItem('sheetId') || defaultSheetId;
+    let sheetId = localStorage.getItem('sheetId') || defaultSheetId;
+    let sheetUrl = localStorage.getItem('sheetUrl') || `https://docs.google.com/spreadsheets/d/${sheetId}/edit?gid=0#gid=0`;
     localStorage.setItem('sheetId', sheetId);
-    const sheetUrl = localStorage.getItem('sheetUrl') || `https://docs.google.com/spreadsheets/d/${sheetId}/edit?gid=0#gid=0`;
     localStorage.setItem('sheetUrl', sheetUrl);
 
     // Loader
@@ -82,26 +82,36 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Load saved sheet URL if it exists and add password protection
-    if (sheetLinkDiv && sheetUrl) {
-        sheetLinkDiv.innerHTML = `Your booking sheet: <a href="${sheetUrl}" target="_blank" id="viewSheetLink">View Sheet</a>`;
-        const viewSheetLink = document.getElementById('viewSheetLink');
-        if (viewSheetLink) {
-            viewSheetLink.addEventListener('click', (e) => {
-                e.preventDefault(); // Prevent immediate navigation
-                const enteredPassword = prompt('Enter the business owner password to view the sheet:')?.trim();
-                if (enteredPassword === null) return; // User canceled
-                if (enteredPassword === businessPassword) {
-                    console.log('Password correct, redirecting to sheet');
-                    window.open(sheetUrl, '_blank'); // Open sheet in new tab
-                } else {
-                    adminStatus.textContent = 'Incorrect password. Access denied.';
-                    console.log('Incorrect password entered');
-                    setTimeout(() => adminStatus.textContent = '', 3000);
-                }
-            });
+    // Function to update the "View Sheet" link with password protection
+    const updateSheetLink = () => {
+        if (sheetLinkDiv) {
+            sheetLinkDiv.innerHTML = `Your booking sheet: <a href="${sheetUrl}" target="_blank" id="viewSheetLink">View Sheet</a>`;
+            const viewSheetLink = document.getElementById('viewSheetLink');
+            if (viewSheetLink) {
+                viewSheetLink.addEventListener('click', (e) => {
+                    e.preventDefault(); // Prevent default navigation
+                    const enteredPassword = prompt('Enter the business owner password to view the sheet:');
+                    if (enteredPassword === null) {
+                        console.log('Password prompt canceled');
+                        return; // User canceled
+                    }
+                    if (enteredPassword.trim() === businessPassword) {
+                        console.log('Password correct, redirecting to sheet');
+                        window.open(sheetUrl, '_blank'); // Open in new tab
+                    } else {
+                        adminStatus.textContent = 'Incorrect password. Access denied.';
+                        console.log('Incorrect password entered');
+                        setTimeout(() => adminStatus.textContent = '', 3000);
+                    }
+                });
+            } else {
+                console.error('View Sheet link not found after update');
+            }
         }
-    }
+    };
+
+    // Initial call to set up the "View Sheet" link
+    updateSheetLink();
 
     // Change Sheet Logic
     if (changeSheetBtn && sheetLinkDiv && adminStatus) {
@@ -112,30 +122,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 const newSheetId = prompt('Enter the new Sheet ID:')?.trim();
                 if (newSheetId === null) return;
                 if (newSheetId) {
-                    const newSheetUrl = `https://docs.google.com/spreadsheets/d/${newSheetId}/edit`;
+                    sheetId = newSheetId;
+                    sheetUrl = `https://docs.google.com/spreadsheets/d/${newSheetId}/edit`;
                     localStorage.setItem('sheetId', newSheetId);
-                    localStorage.setItem('sheetUrl', newSheetUrl);
-                    sheetLinkDiv.innerHTML = `Your booking sheet: <a href="${newSheetUrl}" target="_blank" id="viewSheetLink">View Sheet</a>`;
+                    localStorage.setItem('sheetUrl', sheetUrl);
+                    updateSheetLink(); // Update link with new URL and reattach listener
                     adminStatus.textContent = 'Sheet changed successfully!';
                     setTimeout(() => adminStatus.textContent = '', 3000);
-
-                    // Re-attach event listener to the new "View Sheet" link
-                    const newViewSheetLink = document.getElementById('viewSheetLink');
-                    if (newViewSheetLink) {
-                        newViewSheetLink.addEventListener('click', (e) => {
-                            e.preventDefault();
-                            const enteredPassword = prompt('Enter the business owner password to view the sheet:')?.trim();
-                            if (enteredPassword === null) return;
-                            if (enteredPassword === businessPassword) {
-                                console.log('Password correct, redirecting to sheet');
-                                window.open(newSheetUrl, '_blank');
-                            } else {
-                                adminStatus.textContent = 'Incorrect password. Access denied.';
-                                console.log('Incorrect password entered');
-                                setTimeout(() => adminStatus.textContent = '', 3000);
-                            }
-                        });
-                    }
                 } else {
                     adminStatus.textContent = 'Sheet ID cannot be empty.';
                 }
